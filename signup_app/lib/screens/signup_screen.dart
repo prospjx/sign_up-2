@@ -17,6 +17,27 @@ class _SignupPageState extends State<SignupPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmpasswordController = TextEditingController();
+  bool _isPasswordVisible = false;
+  bool _isConfirmPasswordVisible = false;
+  DateTime? _selectedDate;
+  final TextEditingController _dateController = TextEditingController();
+
+  Future<void> _pickDate() async {
+  DateTime? pickedDate = await showDatePicker(
+    context: context,
+    initialDate: DateTime.now(),
+    firstDate: DateTime(1900),
+    lastDate: DateTime.now(),
+  );
+
+  if (pickedDate != null) {
+    setState(() {
+      _selectedDate = pickedDate;
+      _dateController.text =
+          "${pickedDate.month}/${pickedDate.day}/${pickedDate.year}";
+    });
+  }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -78,16 +99,46 @@ class _SignupPageState extends State<SignupPage> {
                           return null;
                         },
                       ),
+                  const SizedBox(height: 16),
+// 📅 Date of Birth Field
+                  TextFormField(
+                    controller: _dateController,
+                    readOnly: true, // 🔑 prevents typing
+                    decoration: InputDecoration(
+                    labelText: 'Date of Birth',
+                     prefixIcon: const Icon(Icons.calendar_today),
+                     border: const OutlineInputBorder(),
+                          ),
+                    onTap: _pickDate,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                      return 'Please select your birth date';
+                                        }
+                       return null;
+                                    },
+                                        ),
                       const SizedBox(height: 16),
 
                       // 🔒 Password Field
                       TextFormField(
                         controller: _passwordController,
-                        obscureText: true,
-                        decoration: const InputDecoration(
+                        obscureText: !_isPasswordVisible,
+                        decoration:  InputDecoration(
                           labelText: 'Password',
-                          prefixIcon: Icon(Icons.lock),
-                          border: OutlineInputBorder(),
+                          prefixIcon: const Icon(Icons.lock),
+                          border: const OutlineInputBorder(),
+
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _isPasswordVisible
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _isPasswordVisible = !_isPasswordVisible;
+                            });
+                          },)
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -104,12 +155,26 @@ class _SignupPageState extends State<SignupPage> {
                       // 🔒 Confirm Password Field
                       TextFormField(
                         controller: _confirmpasswordController,
-                        obscureText: true,
-                        decoration: const InputDecoration(
+                        obscureText: !_isConfirmPasswordVisible,
+                        decoration:  InputDecoration(
                           labelText: 'Confirm Password',
                           prefixIcon: Icon(Icons.lock_outline),
                           border: OutlineInputBorder(),
+
+                          suffixIcon: IconButton(
+                          icon: Icon(
+                            _isConfirmPasswordVisible
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
+                            });
+                          },
                         ),
+                        ),
+                        
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please confirm your password';
@@ -131,7 +196,7 @@ class _SignupPageState extends State<SignupPage> {
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => SuccessScreen(name: name),
+                                builder: (context) => SuccessScreen(userName: name),
                               ),
                             );
                           }
