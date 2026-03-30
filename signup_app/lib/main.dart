@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:signup_app/screens/success_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -142,17 +143,17 @@ class _SignupPageState extends State<SignupPage> {
                       // 🚀 Sign Up Button
                       ElevatedButton(
                         onPressed: () {
-                          if (_formKey.currentState!.validate()) {
-                            final name = _nameController.text.trim();
+          if (_formKey.currentState!.validate()) {
+          final name = _nameController.text.trim();
 
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => WelcomePage(name: name),
-                              ),
-                            );
-                          }
-                        },
+          Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+          builder: (context) => SuccessScreen(userName: name),
+          ),
+          );
+          }
+          },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.purple,
                           padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
