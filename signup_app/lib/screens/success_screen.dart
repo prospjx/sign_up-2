@@ -112,7 +112,7 @@ class _SuccessScreenState extends State<SuccessScreen> {
                           // Optional: navigate to your app home/dashboard here.
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF5E35B1),
+                          backgroundColor: const Color.fromARGB(255, 13, 5, 28),
                           padding: const EdgeInsets.symmetric(
                             horizontal: 32,
                             vertical: 12,
