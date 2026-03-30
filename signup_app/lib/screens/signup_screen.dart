@@ -9,39 +9,64 @@ class SignupPage extends StatefulWidget {
 }
 
 class _SignupPageState extends State<SignupPage> {
-  // 🔑 The Global Key - acts like a remote control for the form
   final _formKey = GlobalKey<FormState>();
-  
-  // 📝 Controllers to track what the user types
+
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmpasswordController = TextEditingController();
-  bool _isPasswordVisible = false;
-  bool _isConfirmPasswordVisible = false;
-  DateTime? _selectedDate;
+  final TextEditingController _confirmpasswordController =
+      TextEditingController();
   final TextEditingController _dateController = TextEditingController();
 
-  Future<void> _pickDate() async {
-  DateTime? pickedDate = await showDatePicker(
-    context: context,
-    initialDate: DateTime.now(),
-    firstDate: DateTime(1900),
-    lastDate: DateTime.now(),
-  );
+  bool _isPasswordVisible = false;
+  bool _isConfirmPasswordVisible = false;
+  bool _isLoading = false;
 
-  if (pickedDate != null) {
-    setState(() {
-      _selectedDate = pickedDate;
-      _dateController.text =
-          "${pickedDate.month}/${pickedDate.day}/${pickedDate.year}";
-    });
+  DateTime? _selectedDate;
+
+  Future<void> _pickDate() async {
+    DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+    );
+
+    if (pickedDate != null) {
+      setState(() {
+        _selectedDate = pickedDate;
+        _dateController.text =
+            "${pickedDate.month}/${pickedDate.day}/${pickedDate.year}";
+      });
+    }
   }
-}
+
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    await Future.delayed(const Duration(seconds: 2)); // fake loading
+
+    final name = _nameController.text.trim();
+
+    setState(() {
+      _isLoading = false;
+    });
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SuccessScreen(userName: name),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold( // 👨 Parent
+    return Scaffold(
       appBar: AppBar(
         title: const Text('Join Us Today for the Cash Money!'),
         backgroundColor: Colors.purple,
@@ -52,19 +77,23 @@ class _SignupPageState extends State<SignupPage> {
             return SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
               child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: constraints.maxHeight - 32),
-                child: Form( // 👶 Child
+                constraints:
+                    BoxConstraints(minHeight: constraints.maxHeight - 32),
+                child: Form(
                   key: _formKey,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const Text(
                         'Create Your Account',
-                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const SizedBox(height: 20),
 
-                      // 👤 Name Field
+                      // Name
                       TextFormField(
                         controller: _nameController,
                         decoration: const InputDecoration(
@@ -72,16 +101,14 @@ class _SignupPageState extends State<SignupPage> {
                           prefixIcon: Icon(Icons.person),
                           border: OutlineInputBorder(),
                         ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter your name';
-                          }
-                          return null;
-                        },
+                        validator: (value) =>
+                            value == null || value.isEmpty
+                                ? 'Please enter your name'
+                                : null,
                       ),
                       const SizedBox(height: 16),
 
-                      // 📧 Email Field
+                      // Email
                       TextFormField(
                         controller: _emailController,
                         decoration: const InputDecoration(
@@ -99,46 +126,45 @@ class _SignupPageState extends State<SignupPage> {
                           return null;
                         },
                       ),
-                  const SizedBox(height: 16),
-// 📅 Date of Birth Field
-                  TextFormField(
-                    controller: _dateController,
-                    readOnly: true, // 🔑 prevents typing
-                    decoration: InputDecoration(
-                    labelText: 'Date of Birth',
-                     prefixIcon: const Icon(Icons.calendar_today),
-                     border: const OutlineInputBorder(),
-                          ),
-                    onTap: _pickDate,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                      return 'Please select your birth date';
-                                        }
-                       return null;
-                                    },
-                                        ),
                       const SizedBox(height: 16),
 
-                      // 🔒 Password Field
+                      // DOB
+                      TextFormField(
+                        controller: _dateController,
+                        readOnly: true,
+                        decoration: const InputDecoration(
+                          labelText: 'Date of Birth',
+                          prefixIcon: Icon(Icons.calendar_today),
+                          border: OutlineInputBorder(),
+                        ),
+                        onTap: _pickDate,
+                        validator: (value) =>
+                            value == null || value.isEmpty
+                                ? 'Please select your birth date'
+                                : null,
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Password
                       TextFormField(
                         controller: _passwordController,
                         obscureText: !_isPasswordVisible,
-                        decoration:  InputDecoration(
+                        decoration: InputDecoration(
                           labelText: 'Password',
                           prefixIcon: const Icon(Icons.lock),
                           border: const OutlineInputBorder(),
-
                           suffixIcon: IconButton(
                             icon: Icon(
                               _isPasswordVisible
-                                ? Icons.visibility
-                                : Icons.visibility_off,
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _isPasswordVisible = !_isPasswordVisible;
+                              });
+                            },
                           ),
-                          onPressed: () {
-                            setState(() {
-                              _isPasswordVisible = !_isPasswordVisible;
-                            });
-                          },)
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -152,29 +178,28 @@ class _SignupPageState extends State<SignupPage> {
                       ),
                       const SizedBox(height: 16),
 
-                      // 🔒 Confirm Password Field
+                      // Confirm Password
                       TextFormField(
                         controller: _confirmpasswordController,
                         obscureText: !_isConfirmPasswordVisible,
-                        decoration:  InputDecoration(
+                        decoration: InputDecoration(
                           labelText: 'Confirm Password',
-                          prefixIcon: Icon(Icons.lock_outline),
-                          border: OutlineInputBorder(),
-
+                          prefixIcon: const Icon(Icons.lock_outline),
+                          border: const OutlineInputBorder(),
                           suffixIcon: IconButton(
-                          icon: Icon(
-                            _isConfirmPasswordVisible
-                              ? Icons.visibility
-                              : Icons.visibility_off,
+                            icon: Icon(
+                              _isConfirmPasswordVisible
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _isConfirmPasswordVisible =
+                                    !_isConfirmPasswordVisible;
+                              });
+                            },
                           ),
-                          onPressed: () {
-                            setState(() {
-                              _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
-                            });
-                          },
                         ),
-                        ),
-                        
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please confirm your password';
@@ -187,27 +212,28 @@ class _SignupPageState extends State<SignupPage> {
                       ),
                       const SizedBox(height: 24),
 
-                      // 🚀 Sign Up Button
-                      ElevatedButton(
-                        onPressed: () {
-                          if (_formKey.currentState!.validate()) {
-                            final name = _nameController.text.trim();
-
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => SuccessScreen(userName: name),
-                              ),
-                            );
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.purple,
-                          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
-                        ),
-                        child: const Text(
-                          'Sign Up',
-                          style: TextStyle(fontSize: 18),
+                      // BUTTON (your upgraded version)
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: _isLoading ? null : _submit,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.purple,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                          ),
+                          child: _isLoading
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.5,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Text(
+                                  'Sign Up',
+                                  style: TextStyle(fontSize: 18),
+                                ),
                         ),
                       ),
                     ],
